@@ -5,8 +5,10 @@ A React + TypeScript application simulating a vending machine
 
 ## Setup
 
+```bash
 npm install
 npm run dev
+```
 
 ## Features
 	•	Deposit nickels, dimes, quarters
