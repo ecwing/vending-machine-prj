@@ -1,4 +1,4 @@
-import type { MachineState } from '../types/index'
+import type { Coin, MachineState } from '../types/index'
 
 export const products = [
   { name: 'Cola', price: 25, stock: 10 },
@@ -15,4 +15,10 @@ export const initialMachineState: MachineState = {
     quarter: 5,
   },
   products,
+}
+
+export const coinValues: Record<Coin, number> = {
+  nickel: 5,
+  dime: 10,
+  quarter: 25,
 }
