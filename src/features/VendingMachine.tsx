@@ -20,6 +20,7 @@ const VendingMachine: React.FC = () => {
   const [returnedCoins, setReturnedCoins] = useState<CoinInventory | null>(
     null
   );
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Handle coin deposit
   const handleDeposit = (coin: Coin) => {
@@ -38,35 +39,35 @@ const VendingMachine: React.FC = () => {
     setMessage(`Balance: ${machineState.balance + value}¢`);
   };
 
-  // Handles product selection
-  const handleSelectProduct = (product: Product) => {
-    if (product.stock === 0) {
-      setMessage('SOLD OUT');
+  const handlePurchaseSelectedProduct = () => {
+    if (!selectedProduct) {
+      setMessage('Select a product first');
       return;
     }
 
-    if (machineState.balance < product.price) {
-      setMessage(`PRICE: ${product.price}¢`);
+    if (selectedProduct.stock === 0) {
+      setMessage('Sold out');
       return;
     }
 
-    const changeAmount = machineState.balance - product.price;
+    if (machineState.balance < selectedProduct.price) {
+      setMessage(`Price: ${selectedProduct.price}¢`);
+      return;
+    }
 
-    const {
-      success,
-      /* changeCoins, */
-      updatedInventory,
-    } = calculateChange(changeAmount, machineState.coinInventory);
+    const changeAmount = machineState.balance - selectedProduct.price;
+    const { success, changeCoins, updatedInventory } = calculateChange(
+      changeAmount,
+      machineState.coinInventory
+    );
 
     if (!success) {
-      setMessage('EXACT CHANGE ONLY');
+      setMessage('Exact change only');
       return;
     }
 
-    // Enough balance and in stock
-    // const change = machineState.balance - product.price;
     const updatedProducts = machineState.products.map(p =>
-      p.name === product.name ? { ...p, stock: p.stock - 1 } : p
+      p.name === selectedProduct.name ? { ...p, stock: p.stock - 1 } : p
     );
 
     setMachineState({
@@ -76,9 +77,14 @@ const VendingMachine: React.FC = () => {
       products: updatedProducts,
     });
 
-    const changeMsg =
+    setReturnedCoins(changeCoins);
+
+    const changeMesssage =
       changeAmount > 0 ? `Change: ${changeAmount}¢` : 'No Change';
-    setMessage(`Thank you. ${changeMsg}`);
+
+    setMessage(`Thank you! ${changeMesssage}`);
+
+    setSelectedProduct(null);
   };
 
   // Handles cancel
@@ -135,13 +141,13 @@ const VendingMachine: React.FC = () => {
           <ProductSlot
             key={product.name}
             product={product}
-            onClick={() => handleSelectProduct(product)}
+            onClick={() => setSelectedProduct(product)}
           />
         ))}
       </div>
       <ControlPanel
         onCancel={handleCancel}
-        onPurchase={() => setMessage('Select a product first')}
+        onPurchase={handlePurchaseSelectedProduct}
       />
     </div>
   );
