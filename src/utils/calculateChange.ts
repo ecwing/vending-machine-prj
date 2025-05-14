@@ -16,7 +16,7 @@ export function calculateChange(
   const changeCoins: CoinInventory = { nickel: 0, dime: 0, quarter: 0 };
   const newInventory = { ...inventory };
 
-  const coinTypes: Coin[] = ['nickel', 'dime', 'quarter'];
+  const coinTypes: Coin[] = ['quarter', 'dime', 'nickel'];
 
   for (const coin of coinTypes) {
     const coinValue = coinValues[coin];
