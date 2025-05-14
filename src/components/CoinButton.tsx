@@ -1,19 +1,13 @@
 import React from 'react'
-import type { Coin } from '../types/index'
+import type { Coin } from '../types'
 
 interface CoinButtonProps {
   type: Coin
+  onClick: () => void
 }
 
-const CoinButton: React.FC<CoinButtonProps> = ({ type }) => {
-  const handleClick = () => {
-    console.log(`Deposit: ${type}`)
-
-    // deposit logic will go here here
-
-  }
-
-  return <button onClick={handleClick}>{type}</button>
+const CoinButton: React.FC<CoinButtonProps> = ({ type, onClick }) => {
+  return <button onClick={onClick}>{type}</button>
 }
 
 export default CoinButton

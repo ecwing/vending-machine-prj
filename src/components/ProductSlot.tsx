@@ -3,18 +3,12 @@ import type { Product } from '../types/index'
 
 interface ProductSlotProps {
   product: Product
+  onClick: () => void
 }
 
-const ProductSlot: React.FC<ProductSlotProps> = ({ product }) => {
-  const handleSelect = () => {
-    console.log(`handleSelect hit - Selected: ${product.name}`)
-
-    // selection logic will go here
-
-  }
-
+const ProductSlot: React.FC<ProductSlotProps> = ({ product, onClick }) => {
   return (
-    <button onClick={handleSelect} disabled={product.stock === 0}>
+    <button onClick={onClick} disabled={product.stock === 0}>
       {product.name}: {product.price}¢ {product.stock === 0 && '(Sorry out of stock)'}
     </button>
   )

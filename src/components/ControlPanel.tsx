@@ -1,28 +1,15 @@
 import React from 'react'
 
-const ControlPanel: React.FC = () => {
-  const handleCancel = () => {
-    console.log('handleCancel hit')
-   
-     // cancel logic will go here
-
-
+interface ControlPanelProps {
+    onPurchase: () => void
+    onCancel: () => void
   }
 
-  const handlePurchase = () => {
-    console.log('handlePurchase hit')
-    
-    
-    // purchase logic will go here
-
-
-  }
-
-
+const ControlPanel: React.FC<ControlPanelProps> = ({ onPurchase, onCancel }) => {
   return (
-    <div>
-      <button onClick={handlePurchase}>PURCHASE</button>
-      <button onClick={handleCancel} style={{ marginLeft: '1rem' }}>
+    <div style={{ marginTop: '1rem' }}>
+      <button onClick={onPurchase}>PURCHASE</button>
+      <button onClick={onCancel} style={{ marginLeft: '1rem' }}>
         CANCEL
       </button>
     </div>
