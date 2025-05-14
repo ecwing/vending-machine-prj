@@ -1,19 +1,19 @@
-export type Coin = 'nickel' | 'dime' | 'quarter'
+export type Coin = 'nickel' | 'dime' | 'quarter';
 
 export interface Product {
-  name: string
-  price: number
-  stock: number
+  name: string;
+  price: number;
+  stock: number;
 }
 
 export interface CoinInventory {
-  nickel: number
-  dime: number
-  quarter: number
+  nickel: number;
+  dime: number;
+  quarter: number;
 }
 
 export interface MachineState {
-  balance: number
-  coinInventory: CoinInventory
-  products: Product[]
+  balance: number;
+  coinInventory: CoinInventory;
+  products: Product[];
 }

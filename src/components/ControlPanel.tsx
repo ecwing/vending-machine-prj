@@ -1,11 +1,14 @@
-import React from 'react'
+import React from 'react';
 
 interface ControlPanelProps {
-    onPurchase: () => void
-    onCancel: () => void
-  }
+  onPurchase: () => void;
+  onCancel: () => void;
+}
 
-const ControlPanel: React.FC<ControlPanelProps> = ({ onPurchase, onCancel }) => {
+const ControlPanel: React.FC<ControlPanelProps> = ({
+  onPurchase,
+  onCancel,
+}) => {
   return (
     <div style={{ marginTop: '1rem' }}>
       <button onClick={onPurchase}>PURCHASE</button>
@@ -13,7 +16,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ onPurchase, onCancel }) => 
         CANCEL
       </button>
     </div>
-  )
-}
+  );
+};
 
-export default ControlPanel
+export default ControlPanel;
