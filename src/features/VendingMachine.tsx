@@ -83,12 +83,25 @@ const VendingMachine: React.FC = () => {
 
   // Handles cancel
   const handleCancel = () => {
-    const refund = machineState.balance;
+    const refundAmount = machineState.balance;
+
+    const { success, changeCoins, updatedInventory } = calculateChange(
+      refundAmount,
+      machineState.coinInventory
+    );
+
+    if (!success) {
+      setMessage('Unable to make change – contact support');
+      return;
+    }
+
     setMachineState({
       ...machineState,
       balance: 0,
+      coinInventory: updatedInventory,
     });
-    setMessage(`Refund: ${refund}¢`);
+    setReturnedCoins(changeCoins);
+    setMessage(`Refund: ${refundAmount}¢`);
   };
 
   return (
