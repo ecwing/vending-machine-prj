@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { calculateChange } from '../utils/calculateChange';
+import { formatAmount } from '../utils/convertToDollarValue';
+
 import type {
   Coin,
   CoinInventory,
@@ -11,7 +13,7 @@ import { coinValues, initialMachineState } from '../features/dataTypes';
 export function useVendingMachine() {
   const [machineState, setMachineState] =
     useState<MachineState>(initialMachineState);
-  const [message, setMessage] = useState<string>('INSERT COIN');
+  const [message, setMessage] = useState<string>('Insert coins');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [returnedCoins, setReturnedCoins] = useState<CoinInventory | null>(
     null
@@ -29,7 +31,7 @@ export function useVendingMachine() {
       balance: machineState.balance + value,
       coinInventory: updatedInventory,
     });
-    setMessage(`Balance: ${machineState.balance + value}¢`);
+    setMessage(`Balance: ${formatAmount(machineState.balance + value)}`);
   };
 
   const handleSelectProduct = (product: Product) => {
@@ -49,7 +51,9 @@ export function useVendingMachine() {
     }
 
     if (machineState.balance < selectedProduct.price) {
-      setMessage(`Price: ${selectedProduct.price}¢`);
+      setMessage(
+        `Insufficient funds, remaining balance required: ${formatAmount(selectedProduct.price - machineState.balance)}`
+      );
       return;
     }
 
@@ -78,7 +82,7 @@ export function useVendingMachine() {
     setReturnedCoins(changeCoins);
 
     const changeMesssage =
-      changeAmount > 0 ? `Change: ${changeAmount}¢` : 'No Change';
+      changeAmount > 0 ? `Change: ${formatAmount(changeAmount)}` : 'No Change';
 
     setMessage(`Thank you! ${changeMesssage}`);
     setSelectedProduct(null);
@@ -93,7 +97,9 @@ export function useVendingMachine() {
     );
 
     if (!success) {
-      setMessage('Unable to make change – contact support');
+      setMessage(
+        'Sorry we are unable to make change. Your purchase has been cancelled and your money has been refunded'
+      );
       return;
     }
 
@@ -104,7 +110,7 @@ export function useVendingMachine() {
     });
 
     setReturnedCoins(changeCoins);
-    setMessage(`REFUND: ${refundAmount}¢`);
+    setMessage(`Refund amount: ${formatAmount(refundAmount)}`);
   };
 
   return {
