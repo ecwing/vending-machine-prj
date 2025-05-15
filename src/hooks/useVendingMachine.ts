@@ -1,6 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { calculateChange } from '../utils/calculateChange';
 import { formatAmount } from '../utils/convertToDollarValue';
+
+import {
+  saveStateToStorage,
+  loadStateFromStorage,
+  clearStorage,
+} from '../utils/storage';
 
 import type {
   Coin,
@@ -11,13 +17,29 @@ import type {
 import { coinValues, initialMachineState } from '../features/dataTypes';
 
 export function useVendingMachine() {
-  const [machineState, setMachineState] =
-    useState<MachineState>(initialMachineState);
+  const [machineState, setMachineState] = useState(() => {
+    return loadStateFromStorage<MachineState>() || initialMachineState;
+  });
   const [message, setMessage] = useState<string>('Insert coins');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [returnedCoins, setReturnedCoins] = useState<CoinInventory | null>(
     null
   );
+
+  // Save to localStorage anytime state changes
+  useEffect(() => {
+    saveStateToStorage(machineState);
+  }, [machineState]);
+
+  // bonus admin level functionality to reset machine to initial state
+  const resetMachine = () => {
+    clearStorage();
+    setMachineState(initialMachineState);
+
+    setMessage(
+      `Welcome admin, the machine has been reset. All coin quantities and drink stocks are back to their initial quanitity values.`
+    );
+  };
 
   const handleDeposit = (coin: Coin) => {
     const value = coinValues[coin];
@@ -51,6 +73,14 @@ export function useVendingMachine() {
     }
 
     if (machineState.balance < selectedProduct.price) {
+      // If balance is zero - the user has not yet deposited any coins
+      if (machineState.balance === 0) {
+        setMessage(
+          `Please insert coins: ${formatAmount(selectedProduct.price - machineState.balance)}`
+        );
+        return;
+      }
+      // If the balance is a non-zero amount but less than the product price
       setMessage(
         `Insufficient funds, remaining balance required: ${formatAmount(selectedProduct.price - machineState.balance)}`
       );
@@ -114,12 +144,13 @@ export function useVendingMachine() {
   };
 
   return {
+    handleCancel,
+    handleDeposit,
+    handlePurchase,
+    handleSelectProduct,
     machineState,
     message,
+    resetMachine,
     returnedCoins,
-    handleDeposit,
-    handleSelectProduct,
-    handlePurchase,
-    handleCancel,
   };
 }

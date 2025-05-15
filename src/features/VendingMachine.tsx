@@ -16,6 +16,7 @@ const VendingMachine: React.FC = () => {
     handleSelectProduct,
     handlePurchase,
     handleCancel,
+    resetMachine,
   } = useVendingMachine();
 
   return (
@@ -77,6 +78,8 @@ const VendingMachine: React.FC = () => {
             ))}
         </div>
       )}
+
+      <button onClick={resetMachine}>Admin Reset</button>
     </div>
   );
 };
