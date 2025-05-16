@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { calculateChange } from '../utils/calculateChange';
+import { calculateChange, countTotalCoins } from '../utils/calculateChange';
 import { formatAmount } from '../utils/convertToDollarValue';
 
 import {
@@ -15,6 +15,8 @@ import type {
   Product,
 } from '../types/index';
 import { coinValues, initialMachineState } from '../features/dataTypes';
+
+import { playSound, playRefundSound } from '../utils/soundManager';
 
 export function useVendingMachine() {
   const [machineState, setMachineState] = useState(() => {
@@ -42,6 +44,7 @@ export function useVendingMachine() {
   };
 
   const handleDeposit = (coin: Coin) => {
+    playSound('deposit');
     const value = coinValues[coin];
     const updatedInventory = {
       ...machineState.coinInventory,
@@ -57,6 +60,7 @@ export function useVendingMachine() {
   };
 
   const handleSelectProduct = (product: Product) => {
+    playSound('select');
     setSelectedProduct(product);
     setMessage(`Selected: ${product.name}`);
   };
@@ -114,6 +118,14 @@ export function useVendingMachine() {
     const changeMesssage =
       changeAmount > 0 ? `Change: ${formatAmount(changeAmount)}` : 'No Change';
 
+    if (changeAmount === 0) {
+      playSound('dispense');
+    } else {
+      // make it play according to number of coins dispensed
+      playSound('dispense');
+      const total = countTotalCoins(changeCoins);
+      playRefundSound(total);
+    }
     setMessage(`Thank you! ${changeMesssage}`);
     setSelectedProduct(null);
   };
@@ -125,6 +137,16 @@ export function useVendingMachine() {
       refundAmount,
       machineState.coinInventory
     );
+
+    const total = countTotalCoins(changeCoins);
+
+    if (refundAmount) {
+      playSound('select');
+      // make it play according to number of coins dispensed
+      playRefundSound(total);
+    } else {
+      playSound('select');
+    }
 
     if (!success) {
       setMessage(

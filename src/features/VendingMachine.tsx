@@ -5,6 +5,8 @@ import DisplayScreen from '../components/DisplayScreen';
 import ControlPanel from '../components/ControlPanel';
 import type { Coin } from '../types/index';
 
+import { formatAmount } from '../utils/convertToDollarValue';
+
 import { useVendingMachine } from '../hooks/useVendingMachine';
 
 const VendingMachine: React.FC = () => {
@@ -21,24 +23,24 @@ const VendingMachine: React.FC = () => {
 
   return (
     <div>
-      <div>
-        <h3>local balance and vending machine coin balance internal state</h3>
-        <p>balance: {machineState.balance}</p>
-        <div>Coin Inventory</div>
-        <p>Nickels: {machineState.coinInventory.nickel}</p>
-        <p>Dimes: {machineState.coinInventory.dime}</p>
-        <p>Quarters: {machineState.coinInventory.quarter}</p>
-      </div>
+      <div style={{ display: 'flex' }}>
+        <div style={{ margin: '5px' }}>
+          <h3>User/coin balance state</h3>
+          <p>balance: {formatAmount(machineState.balance)}</p>
+          <p>Nickels: {machineState.coinInventory.nickel} coins</p>
+          <p>Dimes: {machineState.coinInventory.dime} coins</p>
+          <p>Quarters: {machineState.coinInventory.quarter} coins</p>
+        </div>
 
-      <div>
-        <h3>Product Inventory</h3>
-        {machineState.products.map(product => (
-          <div style={{ display: 'flex' }} key={product.name}>
-            <h4 style={{ margin: '5px' }}>name: {product.name}</h4>
-            <p style={{ margin: '5px' }}>price: {product.price}</p>
-            <p style={{ margin: '5px' }}>stock: {product.stock}</p>
-          </div>
-        ))}
+        <div style={{ margin: '5px' }}>
+          <h3>Product Inventory</h3>
+          {machineState.products.map(product => (
+            <div style={{ display: 'flex' }} key={product.name}>
+              <h4 style={{ margin: '5px' }}>{product.name} - </h4>
+              <p style={{ margin: '5px' }}>stock: {product.stock}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <DisplayScreen message={message} />
