@@ -33,14 +33,20 @@ export function useVendingMachine() {
 
   const ADMIN_SEQUENCE = ['A', 'D', 'A', 'D', 'B', 'C', 'B', 'C', 'purchase'];
 
-  const handleInput = (input: ButtonTypes) => {
+  const handleInput = (input: ButtonTypes): boolean => {
     inputSequenceRef.current = [...inputSequenceRef.current, input].slice(
       -ADMIN_SEQUENCE.length
     );
 
-    if (inputSequenceRef.current.join(',') === ADMIN_SEQUENCE.join(',')) {
+    const isAdminSequence =
+      inputSequenceRef.current.join(',') === ADMIN_SEQUENCE.join(',');
+
+    if (isAdminSequence) {
       resetMachine();
+      playSound('adminReset');
+      return true;
     }
+    return false;
   };
 
   // Save to localStorage anytime state changes
@@ -54,7 +60,7 @@ export function useVendingMachine() {
     setMachineState(initialMachineState);
 
     setMessage(
-      `Welcome admin, the machine has been reset. All coin quantities and drink stocks are back to their initial quanitity values.`
+      `Welcome admin, the machine has been reset. All coin quantities and drink stocks are back to their initial quantity values.`
     );
   };
 
@@ -93,7 +99,9 @@ export function useVendingMachine() {
   };
 
   const handlePurchase = () => {
-    handleInput('purchase');
+    const isAdminSequenceHit = handleInput('purchase');
+    if (isAdminSequenceHit) return;
+
     if (!selectedProduct) {
       setMessage('Select a product first');
       return;

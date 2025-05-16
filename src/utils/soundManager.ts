@@ -2,12 +2,14 @@ import selectionSound from '../assets/button-selection-sound.mp3';
 import coinInsertSound from '../assets/deposit.mp3';
 import dispenseSound from '../assets/purchase-dispense-sound.mp3';
 import refundCoinsSound from '../assets/coin-return.mp3';
+import adminResetSound from '../assets/success.mp3';
 
 const sounds = {
   select: selectionSound,
   deposit: coinInsertSound,
   dispense: dispenseSound,
   refund: refundCoinsSound,
+  adminReset: adminResetSound,
 };
 
 export function playSound(type: keyof typeof sounds) {
