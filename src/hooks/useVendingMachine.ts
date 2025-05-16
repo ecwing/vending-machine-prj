@@ -52,6 +52,9 @@ export function useVendingMachine() {
   // Save to localStorage anytime state changes
   useEffect(() => {
     saveStateToStorage(machineState);
+    console.log('machineState.balance: ', machineState.balance);
+    console.log('machineState.coinInventory: ', machineState.coinInventory);
+    console.log('machineState.products: ', machineState.products);
   }, [machineState]);
 
   // bonus admin level functionality to reset machine to initial state
