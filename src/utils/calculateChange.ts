@@ -1,6 +1,6 @@
 import type { Coin, CoinInventory } from '../types/index';
 
-import { coinValues } from '../features/dataTypes';
+import { coinValues } from '../features/data';
 
 export interface ChangeResult {
   success: boolean;

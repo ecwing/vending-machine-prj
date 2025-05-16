@@ -1,5 +1,14 @@
 export type Coin = 'nickel' | 'dime' | 'quarter';
 
+export type ButtonTypes =
+  | 'coin'
+  | 'purchase'
+  | 'cancel'
+  | 'A'
+  | 'B'
+  | 'C'
+  | 'D';
+
 export interface Product {
   name: string;
   price: number;

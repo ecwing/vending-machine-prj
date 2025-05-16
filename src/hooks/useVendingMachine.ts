@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { calculateChange, countTotalCoins } from '../utils/calculateChange';
 import { formatAmount } from '../utils/convertToDollarValue';
 
@@ -13,8 +13,9 @@ import type {
   CoinInventory,
   MachineState,
   Product,
+  ButtonTypes,
 } from '../types/index';
-import { coinValues, initialMachineState } from '../features/dataTypes';
+import { coinValues, initialMachineState } from '../features/data';
 
 import { playSound, playRefundSound } from '../utils/soundManager';
 
@@ -27,6 +28,20 @@ export function useVendingMachine() {
   const [returnedCoins, setReturnedCoins] = useState<CoinInventory | null>(
     null
   );
+
+  const inputSequenceRef = useRef<string[]>([]);
+
+  const ADMIN_SEQUENCE = ['A', 'D', 'A', 'D', 'B', 'C', 'B', 'C', 'purchase'];
+
+  const handleInput = (input: ButtonTypes) => {
+    inputSequenceRef.current = [...inputSequenceRef.current, input].slice(
+      -ADMIN_SEQUENCE.length
+    );
+
+    if (inputSequenceRef.current.join(',') === ADMIN_SEQUENCE.join(',')) {
+      resetMachine();
+    }
+  };
 
   // Save to localStorage anytime state changes
   useEffect(() => {
@@ -44,6 +59,7 @@ export function useVendingMachine() {
   };
 
   const handleDeposit = (coin: Coin) => {
+    handleInput('coin');
     playSound('deposit');
     const value = coinValues[coin];
     const updatedInventory = {
@@ -63,9 +79,21 @@ export function useVendingMachine() {
     playSound('select');
     setSelectedProduct(product);
     setMessage(`Selected: ${product.name}`);
+
+    if (product.stock === 0) {
+      setMessage(
+        "Sorry we're sold out of this item. Please make another selection."
+      );
+    }
+
+    if (product.name === 'Cola') handleInput('A');
+    if (product.name === 'Diet Cola') handleInput('B');
+    if (product.name === 'Lime Soda') handleInput('C');
+    if (product.name === 'Water') handleInput('D');
   };
 
   const handlePurchase = () => {
+    handleInput('purchase');
     if (!selectedProduct) {
       setMessage('Select a product first');
       return;
@@ -131,6 +159,8 @@ export function useVendingMachine() {
   };
 
   const handleCancel = () => {
+    handleInput('cancel');
+
     const refundAmount = machineState.balance;
 
     const { success, changeCoins, updatedInventory } = calculateChange(
@@ -172,7 +202,6 @@ export function useVendingMachine() {
     handleSelectProduct,
     machineState,
     message,
-    resetMachine,
     returnedCoins,
   };
 }

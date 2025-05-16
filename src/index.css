@@ -19,11 +19,11 @@
 }
 
 h1 {
-  font-family: 'customDigitalFont', monospace;
+  font-family: 'customDigitalFont', sans-serif;
 }
 
 body {
-  font-family: 'customDigitalFont', monospace;
+  font-family: 'customDigitalFont', sans-serif;
 }
 
 a {
