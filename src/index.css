@@ -13,6 +13,19 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+@font-face {
+  font-family: 'customDigitalFont';
+  src: url('./digital-7-3.ttf') format('truetype');
+}
+
+h1 {
+  font-family: 'customDigitalFont', monospace;
+}
+
+body {
+  font-family: 'customDigitalFont', monospace;
+}
+
 a {
   font-weight: 500;
   color: #646cff;

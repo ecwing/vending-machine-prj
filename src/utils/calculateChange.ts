@@ -42,3 +42,7 @@ export function calculateChange(
     updatedInventory: inventory, // leave unchanged
   };
 }
+
+export function countTotalCoins(coins: CoinInventory): number {
+  return Object.values(coins).reduce((sum, count) => sum + count, 0);
+}
