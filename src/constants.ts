@@ -32,8 +32,8 @@ export const DEFAULT_MESSAGE = 'Welcome! Please make a selection.';
 export const DISPLAY_BALANCE = (amount: number) =>
   `Balance: ${formatAmount(amount)}`;
 
-export const SELECTED_PRODUCT = (productName: ProductName) =>
-  `Selected: ${productName}`;
+export const SELECTED_PRODUCT = (product: ProductName) =>
+  `Selected: ${product}`;
 
 export const ADMIN_RESET_MESSAGE = `Welcome admin! Coins & drink stocks reset to initial values.`;
 export const ADMIN_ZERO_MESSAGE =
