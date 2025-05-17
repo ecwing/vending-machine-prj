@@ -2,6 +2,8 @@ import type { Coin, CoinInventory } from '../types/index';
 
 import { coinValues } from '../features/data';
 
+import { COINS_SORTED_DESCENDING } from '../constants';
+
 export interface ChangeResult {
   success: boolean;
   changeCoins: CoinInventory;
@@ -16,7 +18,7 @@ export function calculateChange(
   const changeCoins: CoinInventory = { nickel: 0, dime: 0, quarter: 0 };
   const newInventory = { ...inventory };
 
-  const coinTypes: Coin[] = ['quarter', 'dime', 'nickel'];
+  const coinTypes: Coin[] = COINS_SORTED_DESCENDING;
 
   for (const coin of coinTypes) {
     const coinValue = coinValues[coin];

@@ -1,4 +1,5 @@
 export type Coin = 'nickel' | 'dime' | 'quarter';
+export type ProductName = 'Cola' | 'Diet Cola' | 'Lime Soda' | 'Water';
 
 export type ButtonTypes =
   | 'coin'
@@ -10,7 +11,7 @@ export type ButtonTypes =
   | 'D';
 
 export interface Product {
-  name: string;
+  name: ProductName;
   price: number;
   stock: number;
 }
