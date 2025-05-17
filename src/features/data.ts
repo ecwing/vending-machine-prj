@@ -15,6 +15,11 @@ export const initialMachineState: MachineState = {
     quarter: 5,
   },
   products,
+  currentCoinBalance: {
+    nickel: 0,
+    dime: 0,
+    quarter: 0,
+  },
 };
 
 export const coinValues: Record<Coin, number> = {
