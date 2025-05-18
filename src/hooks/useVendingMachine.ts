@@ -209,7 +209,7 @@ export function useVendingMachine() {
       coinInventory: updatedInventory,
       currentCoinBalance: updatedDeposited,
     }));
-    setMessage(DISPLAY_BALANCE(machineState.balance + value));
+    setMessage(DISPLAY_BALANCE(value));
   };
 
   const handleSelectProduct = (product: Product) => {

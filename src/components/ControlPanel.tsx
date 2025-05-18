@@ -10,9 +10,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onCancel,
 }) => {
   return (
-    <div style={{ marginTop: '1rem' }}>
-      <button onClick={onPurchase}>PURCHASE</button>
-      <button onClick={onCancel} style={{ marginLeft: '1rem' }}>
+    <div className="controlPanelWrapper">
+      <button onClick={onPurchase} className="controlButton">
+        PURCHASE
+      </button>
+      <button onClick={onCancel} className="controlButton">
         CANCEL
       </button>
     </div>

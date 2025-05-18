@@ -8,8 +8,8 @@ interface ProductSlotProps {
 
 const ProductSlot: React.FC<ProductSlotProps> = ({ product, onClick }) => {
   return (
-    <button onClick={onClick}>
-      {product.name}: {product.price}¢{' '}
+    <button onClick={onClick} className="vendingButton">
+      {product.machineKey}
     </button>
   );
 };

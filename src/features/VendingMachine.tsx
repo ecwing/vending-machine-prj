@@ -3,15 +3,18 @@ import CoinButton from '../components/CoinButton';
 import ProductSlot from '../components/ProductSlot';
 import DisplayScreen from '../components/DisplayScreen';
 import ControlPanel from '../components/ControlPanel';
-import type { Coin } from '../types/index';
+import { COINS, DRINK_IMAGES } from '../constants';
 
 import { useVendingMachine } from '../hooks/useVendingMachine';
+
+import { formatAmount } from '../utils/convertToDollarValue';
 
 const VendingMachine: React.FC = () => {
   const {
     machineState,
     message,
-    returnedCoins,
+    balance,
+    currency,
     handleDeposit,
     handleSelectProduct,
     handlePurchase,
@@ -19,44 +22,56 @@ const VendingMachine: React.FC = () => {
   } = useVendingMachine();
 
   return (
-    <div>
-      <DisplayScreen message={message} />
-
+    <div className="vendingMachineWrapper">
       <div>
-        <h2>Deposit Coins</h2>
-        {(['nickel', 'dime', 'quarter'] as Coin[]).map(coin => (
-          <CoinButton
-            key={coin}
-            type={coin}
-            onClick={() => handleDeposit(coin)}
-          />
-        ))}
-      </div>
+        <DisplayScreen message={message} balance={balance} />
 
-      <h2>Select your drink!</h2>
-      <div>
-        {machineState.products.map(p => (
-          <ProductSlot
-            key={p.name}
-            product={p}
-            onClick={() => handleSelectProduct(p)}
-          />
-        ))}
-      </div>
-      <ControlPanel onPurchase={handlePurchase} onCancel={handleCancel} />
-
-      {returnedCoins && (
-        <div>
-          <h4>Coin Return</h4>
-          {Object.entries(returnedCoins)
-            .filter(([, count]) => count > 0)
-            .map(([coin, count]) => (
-              <div key={coin}>
-                {coin}: {count}
-              </div>
-            ))}
+        <h3>Insert Coins</h3>
+        <div className="coinContainer">
+          {COINS.map(coin => (
+            <div className="coinItem">
+              <CoinButton
+                key={coin}
+                type={coin}
+                onClick={() => handleDeposit(coin)}
+                currency={currency}
+              />
+              {/* <img src={COIN_IMAGES[currency][coin]} alt={`${coin} coin`} /> */}
+            </div>
+          ))}
         </div>
-      )}
+        {/* <h3>2. Select your drink!</h3> */}
+        {machineState.products.map(p => (
+          <div className="productItem">
+            <ProductSlot
+              key={p.name}
+              product={p}
+              onClick={() => handleSelectProduct(p)}
+            />
+          </div>
+        ))}
+        <ControlPanel onPurchase={handlePurchase} onCancel={handleCancel} />
+      </div>
+
+      <div className="productGrid">
+        {machineState.products.map(p => (
+          <div key={p.name} className="productItem">
+            <div
+              className={`productImageWrapper ${p.stock === 0 ? 'soldOut' : ''}`}
+            >
+              <img
+                src={DRINK_IMAGES[p.key]}
+                alt={`${p.name}`}
+                className="productImage"
+              />
+              {p.stock === 0 && <div className="soldOutOverlay">Sold Out</div>}
+            </div>
+            <p>
+              {p.machineKey}. {p.name} - {formatAmount(p.price)}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

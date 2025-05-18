@@ -75,7 +75,7 @@ export const COINS_SORTED_DESCENDING: Coin[] = ['quarter', 'dime', 'nickel'];
 export const DEFAULT_MESSAGE = 'Welcome! Please make a selection.';
 
 export const DISPLAY_BALANCE = (amount: number) =>
-  `Balance: ${formatAmount(amount)}`;
+  `Inserted: ${formatAmount(amount)}`;
 
 export const SELECTED_PRODUCT = (product: ProductName) =>
   `Selected: ${product}`;
