@@ -1,3 +1,5 @@
+import { DRINK_IMAGES } from '../constants';
+
 export type Coin = 'nickel' | 'dime' | 'quarter';
 export type ProductName = 'Cola' | 'Diet Cola' | 'Lime Soda' | 'Water';
 
@@ -10,8 +12,10 @@ export type ButtonTypes =
   | 'C'
   | 'D';
 
+export type currency = 'USD' | 'CAD';
 export interface Product {
   name: ProductName;
+  key: keyof typeof DRINK_IMAGES;
   price: number;
   stock: number;
 }
@@ -27,4 +31,5 @@ export interface MachineState {
   coinInventory: CoinInventory;
   products: Product[];
   currentCoinBalance: CoinInventory;
+  currency: currency;
 }

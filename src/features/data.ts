@@ -1,10 +1,11 @@
 import type { Coin, MachineState } from '../types/index';
+import type { Product } from '../types/index';
 
-export const products = [
-  { name: 'Cola', price: 25, stock: 10 },
-  { name: 'Diet Cola', price: 35, stock: 8 },
-  { name: 'Lime Soda', price: 25, stock: 0 },
-  { name: 'Water', price: 45, stock: 2 },
+export const products: Product[] = [
+  { name: 'Cola', key: 'cola', price: 25, stock: 10 },
+  { name: 'Diet Cola', key: 'dietCola', price: 35, stock: 8 },
+  { name: 'Lime Soda', key: 'limeSoda', price: 25, stock: 0 },
+  { name: 'Water', key: 'water', price: 45, stock: 2 },
 ];
 
 export const initialMachineState: MachineState = {
@@ -20,6 +21,7 @@ export const initialMachineState: MachineState = {
     dime: 0,
     quarter: 0,
   },
+  currency: 'USD' as const,
 };
 
 export const coinValues: Record<Coin, number> = {

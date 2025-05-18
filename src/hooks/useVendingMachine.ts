@@ -22,6 +22,7 @@ import { playSound, playRefundSound } from '../utils/soundManager';
 import {
   ADMIN_SEQUENCE_RESET,
   ADMIN_SEQUENCE_ZERO,
+  ADMIN_SEQUENCE_SWAP_CURRENCY,
   DEFAULT_MESSAGE,
   DISPLAY_BALANCE,
   SELECTED_PRODUCT,
@@ -31,7 +32,6 @@ import {
   SELECT_FIRST_MESSAGE,
   SOLD_OUT_ITEM_MESSAGE,
   BALANCE_REMAINING_FOR_PURCHASE,
-  // NO_BALANCE_MESSAGE,
   INSUFFICIENT_FUNDS_MESSAGE,
   THANK_YOU_MESSAGE,
   UNABLE_TO_MAKE_CHANGE_MESSAGE,
@@ -52,6 +52,8 @@ export function useVendingMachine() {
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const inputSequenceRef = useRef<string[]>([]);
+
+  const { balance, currency } = machineState;
 
   const allProductsSoldOut = useMemo(
     () => machineState.products.every(p => p.stock === 0),
@@ -82,6 +84,18 @@ export function useVendingMachine() {
     const isAdminSequenceZero =
       inputSequenceRef.current.join(',') === ADMIN_SEQUENCE_ZERO.join(',');
 
+    const isAdminSequenceSwapCurrency =
+      inputSequenceRef.current.join(',') ===
+      ADMIN_SEQUENCE_SWAP_CURRENCY.join(',');
+
+    if (isAdminSequenceSwapCurrency) {
+      const newCurrency = currency === 'USD' ? 'CAD' : 'USD';
+      setMachineState(prev => ({ ...prev, currency: newCurrency }));
+
+      playSound('adminReset');
+      return true;
+    }
+
     if (isAdminSequenceReset) {
       resetMachine();
       playSound('adminReset');
@@ -99,7 +113,7 @@ export function useVendingMachine() {
   // !TO DO USEEFFCT HAS TOO MANY STATE UPDATES CAUSING RE-RENDERS
   useEffect(() => {
     saveStateToStorage(machineState);
-    //   console.log('machineState.balance: ', machineState.balance);
+    //   console.log('balance: ', balance);
     //   console.log('machineState.coinInventory: ', machineState.coinInventory);
     //   console.log('machineState.products: ', machineState.products);
 
@@ -135,6 +149,7 @@ export function useVendingMachine() {
         ...p,
         stock: 0,
       })),
+      currency: 'USD',
     });
     setMessageWithTimeout(ADMIN_ZERO_MESSAGE);
   };
@@ -213,11 +228,12 @@ export function useVendingMachine() {
   };
 
   const handlePurchase = () => {
+    playSound('select');
     const isAdminSequenceHit = handleInput('purchase');
     if (isAdminSequenceHit) return;
 
     if (!selectedProduct) {
-      setMessageWithTimeout(SELECT_FIRST_MESSAGE);
+      setMessage(SELECT_FIRST_MESSAGE);
       return;
     }
 
@@ -226,24 +242,20 @@ export function useVendingMachine() {
       return;
     }
 
-    if (machineState.balance < selectedProduct.price) {
+    if (balance < selectedProduct.price) {
       // If balance is zero - the user has not yet deposited any coins
-      if (machineState.balance === 0) {
+      if (balance === 0) {
         setMessage(
-          BALANCE_REMAINING_FOR_PURCHASE(
-            selectedProduct.price - machineState.balance
-          )
+          BALANCE_REMAINING_FOR_PURCHASE(selectedProduct.price - balance)
         );
         return;
       }
       // If the balance is a non-zero amount but less than the product price
-      setMessage(
-        INSUFFICIENT_FUNDS_MESSAGE(selectedProduct.price - machineState.balance)
-      );
+      setMessage(INSUFFICIENT_FUNDS_MESSAGE(selectedProduct.price - balance));
       return;
     }
 
-    const changeAmount = machineState.balance - selectedProduct.price;
+    const changeAmount = balance - selectedProduct.price;
     const { success, changeCoins, updatedInventory } = calculateChange(
       changeAmount,
       machineState.coinInventory
@@ -287,7 +299,7 @@ export function useVendingMachine() {
       Pick<MachineState, 'balance' | 'coinInventory' | 'currentCoinBalance'>
     >
   ) => {
-    const refundAmount = overrides?.balance ?? machineState.balance;
+    const refundAmount = overrides?.balance ?? balance;
     const coinInventory =
       overrides?.coinInventory ?? machineState.coinInventory;
     const currentCoinBalance =
@@ -358,6 +370,8 @@ export function useVendingMachine() {
     handleSelectProduct,
     machineState,
     message,
+    balance,
+    currency,
     returnedCoins,
   };
 }
