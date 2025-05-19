@@ -12,4 +12,5 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
     },
   },
+  base: '/vending-machine-prj/',
 });

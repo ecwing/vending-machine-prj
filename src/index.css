@@ -23,7 +23,7 @@
 
 @font-face {
   font-family: 'customDigitalFont';
-  src: url('./digital-7-3.ttf') format('truetype');
+  src: url('/digital-7-3.ttf') format('truetype');
 }
 
 .screen-reader-only {
