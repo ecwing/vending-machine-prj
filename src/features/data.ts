@@ -10,6 +10,8 @@ export const products: Product[] = [
 
 export const initialMachineState: MachineState = {
   balance: 0,
+  remainingBalance: 0,
+  selectedProduct: null,
   coinInventory: {
     nickel: 5,
     dime: 5,

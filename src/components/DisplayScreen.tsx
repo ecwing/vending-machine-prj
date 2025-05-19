@@ -14,7 +14,7 @@ const DisplayScreen: React.FC<DisplayScreenProps> = ({
   remainingBalanceOnItem,
   selectedProduct,
 }) => {
-  const isLongMessage = message.length > 30;
+  const isLongMessage = message.length > 26;
 
   return (
     <div className="displayWrapper">

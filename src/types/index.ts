@@ -30,6 +30,8 @@ export interface CoinInventory {
 
 export interface MachineState {
   balance: number;
+  remainingBalance: number;
+  selectedProduct: Product | null;
   coinInventory: CoinInventory;
   products: Product[];
   currentCoinBalance: CoinInventory;
