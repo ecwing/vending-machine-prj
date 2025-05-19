@@ -19,12 +19,11 @@ import { coinValues, initialMachineState } from '../features/data';
 
 import { playSound, playRefundSound } from '../utils/soundManager';
 
+import { DEPOSIT_SOUND_DURATION_MS } from '../constants';
+
 import {
-  ADMIN_SEQUENCE_RESET,
-  ADMIN_SEQUENCE_ZERO,
-  ADMIN_SEQUENCE_SWAP_CURRENCY,
   DEFAULT_MESSAGE,
-  DEPOSIT_SOUND_DURATION_MS,
+  DEFAULT_ALL_PRODUCTS_SOLD_OUT,
   DISPLAY_BALANCE,
   SELECTED_PRODUCT,
   ADMIN_RESET_MESSAGE,
@@ -37,15 +36,37 @@ import {
   THANK_YOU_MESSAGE,
   UNABLE_TO_MAKE_CHANGE_MESSAGE,
   REFUND_AMOUNT_MESSAGE,
-} from '../constants';
+  REFUND_OVERPAYMENT,
+} from '../utils/machineMessages';
+
+import {
+  ADMIN_SEQUENCE_RESET,
+  ADMIN_SEQUENCE_ZERO,
+  ADMIN_SEQUENCE_SWAP_CURRENCY,
+} from '../utils/adminSequences';
 
 export function useVendingMachine() {
   const [machineState, setMachineState] = useState(() => {
     return loadStateFromStorage<MachineState>() || initialMachineState;
   });
 
-  const [message, setMessage] = useState<string>(DEFAULT_MESSAGE);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const selectedProduct = machineState.selectedProduct;
+  const setSelectedProduct = (product: Product | null) =>
+    setMachineState(prev => ({
+      ...prev,
+      selectedProduct: product,
+      remainingBalance: product ? Math.max(0, product.price - prev.balance) : 0,
+    }));
+
+  const initialSelectedProduct = machineState.selectedProduct;
+
+  const [message, setMessage] = useState<string>(() => {
+    if (initialSelectedProduct?.name) {
+      return `Selected: ${initialSelectedProduct.name}`;
+    }
+    return DEFAULT_MESSAGE;
+  });
+
   const [returnedCoins, setReturnedCoins] = useState<CoinInventory | null>(
     null
   );
@@ -54,16 +75,41 @@ export function useVendingMachine() {
 
   const inputSequenceRef = useRef<string[]>([]);
 
-  const { balance, currency } = machineState;
+  const {
+    balance,
+    currency,
+    remainingBalance: remainingBalanceOnItem,
+  } = machineState;
 
   const allProductsSoldOut = useMemo(
     () => machineState.products.every(p => p.stock === 0),
     [machineState.products]
   );
 
-  const remainingBalanceOnItem = useMemo(() => {
-    return selectedProduct ? Math.max(0, selectedProduct.price - balance) : 0;
-  }, [selectedProduct, balance]);
+  const getDefaultMessage = () => {
+    return allProductsSoldOut ? DEFAULT_ALL_PRODUCTS_SOLD_OUT : DEFAULT_MESSAGE;
+  };
+
+  const trackedState = useMemo(
+    () => ({
+      balance: machineState.balance,
+      remainingBalance: machineState.remainingBalance,
+      selectedProduct: machineState.selectedProduct,
+      coinInventory: machineState.coinInventory,
+      products: machineState.products,
+      currentCoinBalance: machineState.currentCoinBalance,
+      currency: machineState.currency,
+    }),
+    [
+      machineState.balance,
+      machineState.remainingBalance,
+      machineState.selectedProduct,
+      machineState.coinInventory,
+      machineState.products,
+      machineState.currentCoinBalance,
+      machineState.currency,
+    ]
+  );
 
   const setMessageWithTimeout = (msg: string, duration = 7000) => {
     setMessage(msg);
@@ -73,7 +119,7 @@ export function useVendingMachine() {
     }
 
     messageTimeoutRef.current = setTimeout(() => {
-      setMessage(DEFAULT_MESSAGE);
+      setMessage(getDefaultMessage());
       messageTimeoutRef.current = null;
     }, duration);
   };
@@ -114,18 +160,10 @@ export function useVendingMachine() {
     return false;
   };
 
-  // Save to localStorage anytime state changes
-  // !TO DO USEEFFCT HAS TOO MANY STATE UPDATES CAUSING RE-RENDERS
   useEffect(() => {
-    saveStateToStorage(machineState);
-    //   console.log('balance: ', balance);
-    //   console.log('machineState.coinInventory: ', machineState.coinInventory);
-    //   console.log('machineState.products: ', machineState.products);
-
-    // if (machineState.products.every(p => p.stock === 0)) {
-    //   setMessage('All products have been sold out. Come back again!');
-    // }
-  }, [machineState]);
+    console.log('machineState: ', machineState);
+    saveStateToStorage({ ...machineState });
+  }, [trackedState]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // bonus admin level functionality to reset machine to initial state
   const resetMachine = () => {
@@ -140,6 +178,8 @@ export function useVendingMachine() {
     clearStorage();
     setMachineState({
       balance: 0,
+      remainingBalance: 0,
+      selectedProduct: null,
       coinInventory: {
         nickel: 0,
         dime: 0,
@@ -209,7 +249,7 @@ export function useVendingMachine() {
     };
 
     // Attempt to refund overpayment if a product is selected
-    const refunded = handleOverpaymentRefund(coin, value, updatedInventory);
+    const refunded = handleOverpaymentRefund(value, updatedInventory);
 
     if (!refunded) {
       setMachineState(prev => ({
@@ -374,19 +414,18 @@ export function useVendingMachine() {
   };
 
   const handleOverpaymentRefund = (
-    coin: Coin,
     value: number,
     updatedCoinInventory: CoinInventory
   ): boolean => {
     if (!selectedProduct) return false;
 
-    const newBalance = balance + value;
     const price = selectedProduct.price;
 
-    // If newBalance > price AND previous balance was already >= price,
-    // then refund the new overpayment
-    if (newBalance > price && balance >= price) {
-      const overpaid = newBalance - price;
+    const wasAlreadySufficient = balance >= price;
+    const causesOverpayment = balance + value > price;
+
+    if (wasAlreadySufficient && causesOverpayment) {
+      const overpaid = value;
 
       const { success, changeCoins, updatedInventory } = calculateChange(
         overpaid,
@@ -399,10 +438,10 @@ export function useVendingMachine() {
           playRefundSound(countTotalCoins(changeCoins));
           setMachineState(prev => ({
             ...prev,
-            balance: newBalance - overpaid,
+            balance: balance,
             coinInventory: updatedInventory,
           }));
-          setMessage(`Returned overpayment: ${formatAmount(overpaid)}`);
+          setMessage(REFUND_OVERPAYMENT(overpaid));
         };
         setTimeout(updateMachine, DEPOSIT_SOUND_DURATION_MS);
         return true;
