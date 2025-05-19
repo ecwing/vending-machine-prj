@@ -15,7 +15,7 @@ const CoinButton: React.FC<CoinButtonProps> = ({ type, onClick, currency }) => {
 
   return (
     <button onClick={onClick} aria-label={label} className="coinButton">
-      <span className="visuallyHidden">{label}</span>
+      <span className="screen-reader-only">{label}</span>
       <img
         src={COIN_IMAGES[currency][type]}
         alt={`${type} coin`}

@@ -25,7 +25,7 @@ const VendingMachine: React.FC = () => {
 
   return (
     <div className="vendingMachineWrapper">
-      <h1 className="sr-only">Crisp Vending Machine</h1>
+      <h1 className="screen-reader-only">Crisp Vending Machine</h1>
       <div>
         <DisplayScreen
           message={message}
@@ -44,11 +44,9 @@ const VendingMachine: React.FC = () => {
                 onClick={() => handleDeposit(coin)}
                 currency={currency}
               />
-              {/* <img src={COIN_IMAGES[currency][coin]} alt={`${coin} coin`} /> */}
             </div>
           ))}
         </div>
-        {/* <h3>2. Select your drink!</h3> */}
         {machineState.products.map(p => (
           <div className="productItem">
             <ProductSlot
@@ -64,7 +62,6 @@ const VendingMachine: React.FC = () => {
       <div className="productGrid">
         {machineState.products.map(p => (
           <div key={p.name} className="productItem">
-            {/* <p >{p.machineKey}</p> */}
             <div
               className={`productImageWrapper ${p.stock === 0 ? 'soldOut' : ''}`}
             >

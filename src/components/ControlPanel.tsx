@@ -11,10 +11,18 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 }) => {
   return (
     <div className="controlPanelWrapper">
-      <button onClick={onPurchase} className="controlButton">
+      <button
+        onClick={onPurchase}
+        className="controlButton"
+        aria-label={'Purchase'}
+      >
         PURCHASE
       </button>
-      <button onClick={onCancel} className="controlButton">
+      <button
+        onClick={onCancel}
+        className="controlButton"
+        aria-label={'Cancel'}
+      >
         CANCEL
       </button>
     </div>

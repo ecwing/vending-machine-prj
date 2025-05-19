@@ -118,7 +118,7 @@ export function useVendingMachine() {
   // !TO DO USEEFFCT HAS TOO MANY STATE UPDATES CAUSING RE-RENDERS
   useEffect(() => {
     saveStateToStorage(machineState);
-    //   console.log('balance: ', machineState.balance);
+    //   console.log('balance: ', balance);
     //   console.log('machineState.coinInventory: ', machineState.coinInventory);
     //   console.log('machineState.products: ', machineState.products);
 
