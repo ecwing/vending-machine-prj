@@ -14,7 +14,9 @@ const VendingMachine: React.FC = () => {
     machineState,
     message,
     balance,
+    remainingBalanceOnItem,
     currency,
+    selectedProduct,
     handleDeposit,
     handleSelectProduct,
     handlePurchase,
@@ -23,8 +25,14 @@ const VendingMachine: React.FC = () => {
 
   return (
     <div className="vendingMachineWrapper">
+      <h1 className="sr-only">Crisp Vending Machine</h1>
       <div>
-        <DisplayScreen message={message} balance={balance} />
+        <DisplayScreen
+          message={message}
+          balance={balance}
+          remainingBalanceOnItem={remainingBalanceOnItem}
+          selectedProduct={selectedProduct}
+        />
 
         <h3>Insert Coins</h3>
         <div className="coinContainer">
@@ -56,6 +64,7 @@ const VendingMachine: React.FC = () => {
       <div className="productGrid">
         {machineState.products.map(p => (
           <div key={p.name} className="productItem">
+            {/* <p >{p.machineKey}</p> */}
             <div
               className={`productImageWrapper ${p.stock === 0 ? 'soldOut' : ''}`}
             >
@@ -66,6 +75,7 @@ const VendingMachine: React.FC = () => {
               />
               {p.stock === 0 && <div className="soldOutOverlay">Sold Out</div>}
             </div>
+
             <p>
               {p.machineKey}. {p.name} - {formatAmount(p.price)}
             </p>

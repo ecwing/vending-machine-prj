@@ -69,6 +69,8 @@ export const ADMIN_SEQUENCE_SWAP_CURRENCY = [
   'purchase',
 ];
 
+export const DEPOSIT_SOUND_DURATION_MS = 1500;
+
 export const COINS: Coin[] = ['nickel', 'dime', 'quarter'];
 export const COINS_SORTED_DESCENDING: Coin[] = ['quarter', 'dime', 'nickel'];
 

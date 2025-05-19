@@ -24,6 +24,7 @@ import {
   ADMIN_SEQUENCE_ZERO,
   ADMIN_SEQUENCE_SWAP_CURRENCY,
   DEFAULT_MESSAGE,
+  DEPOSIT_SOUND_DURATION_MS,
   DISPLAY_BALANCE,
   SELECTED_PRODUCT,
   ADMIN_RESET_MESSAGE,
@@ -60,7 +61,11 @@ export function useVendingMachine() {
     [machineState.products]
   );
 
-  const setMessageWithTimeout = (msg: string, duration = 5000) => {
+  const remainingBalanceOnItem = useMemo(() => {
+    return selectedProduct ? Math.max(0, selectedProduct.price - balance) : 0;
+  }, [selectedProduct, balance]);
+
+  const setMessageWithTimeout = (msg: string, duration = 7000) => {
     setMessage(msg);
 
     if (messageTimeoutRef.current) {
@@ -113,7 +118,7 @@ export function useVendingMachine() {
   // !TO DO USEEFFCT HAS TOO MANY STATE UPDATES CAUSING RE-RENDERS
   useEffect(() => {
     saveStateToStorage(machineState);
-    //   console.log('balance: ', balance);
+    //   console.log('balance: ', machineState.balance);
     //   console.log('machineState.coinInventory: ', machineState.coinInventory);
     //   console.log('machineState.products: ', machineState.products);
 
@@ -187,7 +192,7 @@ export function useVendingMachine() {
           coinInventory: tempInventory,
           currentCoinBalance: updatedDeposited,
         });
-      }, 1500); // timeout to consider length of deposit sound to refund sound
+      }, DEPOSIT_SOUND_DURATION_MS);
       return;
     }
 
@@ -203,13 +208,18 @@ export function useVendingMachine() {
       [coin]: machineState.currentCoinBalance[coin] + 1,
     };
 
-    setMachineState(prev => ({
-      ...prev,
-      balance: prev.balance + value,
-      coinInventory: updatedInventory,
-      currentCoinBalance: updatedDeposited,
-    }));
-    setMessage(DISPLAY_BALANCE(value));
+    // Attempt to refund overpayment if a product is selected
+    const refunded = handleOverpaymentRefund(coin, value, updatedInventory);
+
+    if (!refunded) {
+      setMachineState(prev => ({
+        ...prev,
+        balance: prev.balance + value,
+        coinInventory: updatedInventory,
+        currentCoinBalance: updatedDeposited,
+      }));
+      setMessage(DISPLAY_BALANCE(value));
+    }
   };
 
   const handleSelectProduct = (product: Product) => {
@@ -218,7 +228,7 @@ export function useVendingMachine() {
     setMessage(SELECTED_PRODUCT(product.name));
 
     if (product.stock === 0) {
-      setMessageWithTimeout(SOLD_OUT_ITEM_MESSAGE);
+      setMessage(SOLD_OUT_ITEM_MESSAGE);
     }
 
     if (product.name === 'Cola') handleInput('A');
@@ -363,6 +373,45 @@ export function useVendingMachine() {
     setMessageWithTimeout(REFUND_AMOUNT_MESSAGE(refundAmount));
   };
 
+  const handleOverpaymentRefund = (
+    coin: Coin,
+    value: number,
+    updatedCoinInventory: CoinInventory
+  ): boolean => {
+    if (!selectedProduct) return false;
+
+    const newBalance = balance + value;
+    const price = selectedProduct.price;
+
+    // If newBalance > price AND previous balance was already >= price,
+    // then refund the new overpayment
+    if (newBalance > price && balance >= price) {
+      const overpaid = newBalance - price;
+
+      const { success, changeCoins, updatedInventory } = calculateChange(
+        overpaid,
+        updatedCoinInventory
+      );
+
+      if (success) {
+        const updateMachine = () => {
+          setReturnedCoins(changeCoins);
+          playRefundSound(countTotalCoins(changeCoins));
+          setMachineState(prev => ({
+            ...prev,
+            balance: newBalance - overpaid,
+            coinInventory: updatedInventory,
+          }));
+          setMessage(`Returned overpayment: ${formatAmount(overpaid)}`);
+        };
+        setTimeout(updateMachine, DEPOSIT_SOUND_DURATION_MS);
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   return {
     handleCancel,
     handleDeposit,
@@ -371,6 +420,8 @@ export function useVendingMachine() {
     machineState,
     message,
     balance,
+    remainingBalanceOnItem,
+    selectedProduct,
     currency,
     returnedCoins,
   };
