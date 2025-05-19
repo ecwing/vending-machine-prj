@@ -228,3 +228,12 @@ UI Responsiveness & Styling
 
 Font: https://www.azfonts.net/fonts/digital-7/regular-270347
 converting file sizes: https://squoosh.app/editor
+
+## Stretch goals unable to complete - consider to add at a later time
+
+- Audio on / off Toggle?
+- UI indicator that the product selected is highlighted
+- Still there? setTimeout to refund balance after a period of time?
+- Animate coin return or show coin inventory
+- Light/Dark mode switch?
+- For trouble shooting and all other inquires, please contact vending machine operator/distributor @ my phone number or email address
