@@ -417,6 +417,7 @@ export function useVendingMachine() {
       balance: 0,
       coinInventory: inventoryToUpdate,
       currentCoinBalance: { nickel: 0, dime: 0, quarter: 0 },
+      remainingBalance: 0,
     });
 
     setReturnedCoins(coinsToReturn);
