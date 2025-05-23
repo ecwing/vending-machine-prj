@@ -28,6 +28,8 @@ import {
   SELECTED_PRODUCT,
   ADMIN_RESET_MESSAGE,
   ADMIN_ZERO_MESSAGE,
+  ADMIN_SWAP_CURRENCY_MESSAGE,
+  ADMIN_TOGGLE_DISPLAY_MESSAGE,
   SOLD_OUT_MESSAGE,
   SELECT_FIRST_MESSAGE,
   SOLD_OUT_ITEM_MESSAGE,
@@ -43,6 +45,7 @@ import {
   ADMIN_SEQUENCE_RESET,
   ADMIN_SEQUENCE_ZERO,
   ADMIN_SEQUENCE_SWAP_CURRENCY,
+  ADMIN_SEQUENCE_TOGGLE_DISPLAY,
 } from '../utils/adminSequences';
 
 export function useVendingMachine() {
@@ -71,15 +74,15 @@ export function useVendingMachine() {
     null
   );
 
+  const [showAdminDisplay, setShowAdminDisplay] = useState(false);
+
+  const [droppedProduct, setDroppedProduct] = useState<Product | null>(null);
+
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const inputSequenceRef = useRef<string[]>([]);
 
-  const {
-    balance,
-    currency,
-    remainingBalance: remainingBalanceOnItem,
-  } = machineState;
+  const { balance, currency, remainingBalance } = machineState;
 
   const allProductsSoldOut = useMemo(
     () => machineState.products.every(p => p.stock === 0),
@@ -139,10 +142,22 @@ export function useVendingMachine() {
       inputSequenceRef.current.join(',') ===
       ADMIN_SEQUENCE_SWAP_CURRENCY.join(',');
 
+    const isAdminSequenceToggleDisplay =
+      inputSequenceRef.current.join(',') ===
+      ADMIN_SEQUENCE_TOGGLE_DISPLAY.join(',');
+
     if (isAdminSequenceSwapCurrency) {
       const newCurrency = currency === 'USD' ? 'CAD' : 'USD';
       setMachineState(prev => ({ ...prev, currency: newCurrency }));
+      setMessageWithTimeout(ADMIN_SWAP_CURRENCY_MESSAGE);
+      playSound('adminReset');
+      return true;
+    }
 
+    if (isAdminSequenceToggleDisplay) {
+      if (!showAdminDisplay)
+        setMessageWithTimeout(ADMIN_TOGGLE_DISPLAY_MESSAGE);
+      setShowAdminDisplay(prev => !prev);
       playSound('adminReset');
       return true;
     }
@@ -161,7 +176,7 @@ export function useVendingMachine() {
   };
 
   useEffect(() => {
-    console.log('machineState: ', machineState);
+    console.log('BP EW *** useEffect: ', machineState);
     saveStateToStorage({ ...machineState });
   }, [trackedState]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -248,6 +263,11 @@ export function useVendingMachine() {
       [coin]: machineState.currentCoinBalance[coin] + 1,
     };
 
+    const newBalance = machineState.balance + value;
+    const newRemaining = selectedProduct
+      ? Math.max(0, selectedProduct.price - newBalance)
+      : 0;
+
     // Attempt to refund overpayment if a product is selected
     const refunded = handleOverpaymentRefund(value, updatedInventory);
 
@@ -257,6 +277,7 @@ export function useVendingMachine() {
         balance: prev.balance + value,
         coinInventory: updatedInventory,
         currentCoinBalance: updatedDeposited,
+        remainingBalance: newRemaining,
       }));
       setMessage(DISPLAY_BALANCE(value));
     }
@@ -328,6 +349,12 @@ export function useVendingMachine() {
     });
 
     setReturnedCoins(changeCoins);
+
+    setDroppedProduct(selectedProduct);
+
+    setTimeout(() => {
+      setDroppedProduct(null);
+    }, 3500); // matches the animation duration
 
     const changeMesssage =
       changeAmount > 0 ? `Change: ${formatAmount(changeAmount)}` : 'No Change';
@@ -452,6 +479,7 @@ export function useVendingMachine() {
   };
 
   return {
+    showAdminDisplay,
     handleCancel,
     handleDeposit,
     handlePurchase,
@@ -459,9 +487,10 @@ export function useVendingMachine() {
     machineState,
     message,
     balance,
-    remainingBalanceOnItem,
+    remainingBalance,
     selectedProduct,
     currency,
     returnedCoins,
+    droppedProduct,
   };
 }
