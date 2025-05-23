@@ -31,3 +31,15 @@ export const ADMIN_SEQUENCE_SWAP_CURRENCY = [
   'C',
   'purchase',
 ];
+
+export const ADMIN_SEQUENCE_TOGGLE_DISPLAY = [
+  'A',
+  'B',
+  'C',
+  'D',
+  'A',
+  'B',
+  'C',
+  'D',
+  'purchase',
+];

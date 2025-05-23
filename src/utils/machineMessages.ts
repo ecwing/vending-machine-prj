@@ -16,6 +16,11 @@ export const SELECTED_PRODUCT = (product: ProductName) =>
 export const ADMIN_RESET_MESSAGE = `Welcome admin! Coins & drink stocks reset to initial values.`;
 export const ADMIN_ZERO_MESSAGE =
   'Welcome admin! Coins & drink stocks removed.';
+export const ADMIN_SWAP_CURRENCY_MESSAGE =
+  'Welcome admin! Currency has been changed';
+
+export const ADMIN_TOGGLE_DISPLAY_MESSAGE = `Welcome admin! Coin inventory and product stock now visible`;
+
 export const SOLD_OUT_MESSAGE =
   'Sorry all products sold out. Refunding your coin(s).';
 
