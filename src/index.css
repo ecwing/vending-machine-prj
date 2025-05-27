@@ -350,6 +350,10 @@ p {
   transition: opacity 0.3s ease;
 }
 
+.productImageWrapper:hover {
+  outline: 4px auto var(--color-primary);
+}
+
 .soldOutOverlay {
   position: absolute;
   top: 0;
