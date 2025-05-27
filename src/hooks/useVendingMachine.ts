@@ -54,12 +54,6 @@ export function useVendingMachine() {
   });
 
   const selectedProduct = machineState.selectedProduct;
-  const setSelectedProduct = (product: Product | null) =>
-    setMachineState(prev => ({
-      ...prev,
-      selectedProduct: product,
-      remainingBalance: product ? Math.max(0, product.price - prev.balance) : 0,
-    }));
 
   const initialSelectedProduct = machineState.selectedProduct;
 
@@ -176,7 +170,6 @@ export function useVendingMachine() {
   };
 
   useEffect(() => {
-    console.log('BP EW *** useEffect: ', machineState);
     saveStateToStorage({ ...machineState });
   }, [trackedState]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -264,8 +257,8 @@ export function useVendingMachine() {
     };
 
     const newBalance = machineState.balance + value;
-    const newRemaining = selectedProduct
-      ? Math.max(0, selectedProduct.price - newBalance)
+    const newRemaining = machineState.selectedProduct
+      ? Math.max(0, machineState.selectedProduct.price - newBalance)
       : 0;
 
     // Attempt to refund overpayment if a product is selected
@@ -285,7 +278,13 @@ export function useVendingMachine() {
 
   const handleSelectProduct = (product: Product) => {
     playSound('select');
-    setSelectedProduct(product);
+
+    setMachineState(prev => ({
+      ...prev,
+      selectedProduct: product,
+      remainingBalance: product ? Math.max(0, product.price - prev.balance) : 0,
+    }));
+
     setMessage(SELECTED_PRODUCT(product.name));
 
     if (product.stock === 0) {
@@ -303,30 +302,34 @@ export function useVendingMachine() {
     const isAdminSequenceHit = handleInput('purchase');
     if (isAdminSequenceHit) return;
 
-    if (!selectedProduct) {
+    if (!machineState.selectedProduct) {
       setMessage(SELECT_FIRST_MESSAGE);
       return;
     }
 
-    if (selectedProduct.stock === 0) {
+    if (machineState.selectedProduct.stock === 0) {
       setMessageWithTimeout(SOLD_OUT_ITEM_MESSAGE);
       return;
     }
 
-    if (balance < selectedProduct.price) {
+    if (balance < machineState.selectedProduct.price) {
       // If balance is zero - the user has not yet deposited any coins
       if (balance === 0) {
         setMessage(
-          BALANCE_REMAINING_FOR_PURCHASE(selectedProduct.price - balance)
+          BALANCE_REMAINING_FOR_PURCHASE(
+            machineState.selectedProduct.price - balance
+          )
         );
         return;
       }
       // If the balance is a non-zero amount but less than the product price
-      setMessage(INSUFFICIENT_FUNDS_MESSAGE(selectedProduct.price - balance));
+      setMessage(
+        INSUFFICIENT_FUNDS_MESSAGE(machineState.selectedProduct.price - balance)
+      );
       return;
     }
 
-    const changeAmount = balance - selectedProduct.price;
+    const changeAmount = balance - machineState.selectedProduct.price;
     const { success, changeCoins, updatedInventory } = calculateChange(
       changeAmount,
       machineState.coinInventory
@@ -338,7 +341,7 @@ export function useVendingMachine() {
     }
 
     const updatedProducts = machineState.products.map(p =>
-      p.name === selectedProduct.name ? { ...p, stock: p.stock - 1 } : p
+      p.name === selectedProduct?.name ? { ...p, stock: p.stock - 1 } : p
     );
 
     setMachineState({
@@ -346,11 +349,13 @@ export function useVendingMachine() {
       balance: 0,
       coinInventory: updatedInventory,
       products: updatedProducts,
+      selectedProduct: null,
+      remainingBalance: 0,
     });
 
     setReturnedCoins(changeCoins);
 
-    setDroppedProduct(selectedProduct);
+    setDroppedProduct(machineState.selectedProduct);
 
     setTimeout(() => {
       setDroppedProduct(null);
@@ -368,7 +373,6 @@ export function useVendingMachine() {
       playRefundSound(total);
     }
     setMessageWithTimeout(THANK_YOU_MESSAGE(changeMesssage));
-    setSelectedProduct(null);
   };
 
   const processRefund = (
@@ -418,6 +422,7 @@ export function useVendingMachine() {
       coinInventory: inventoryToUpdate,
       currentCoinBalance: { nickel: 0, dime: 0, quarter: 0 },
       remainingBalance: 0,
+      selectedProduct: null,
     });
 
     setReturnedCoins(coinsToReturn);
@@ -428,8 +433,6 @@ export function useVendingMachine() {
   const handleCancel = () => {
     const isAdminSequenceHit = handleInput('cancel');
     if (isAdminSequenceHit) return;
-
-    setSelectedProduct(null);
 
     const { refundAmount, success } = processRefund();
 
@@ -489,8 +492,6 @@ export function useVendingMachine() {
     message,
     balance,
     remainingBalance,
-    selectedProduct,
-    currency,
     returnedCoins,
     droppedProduct,
   };

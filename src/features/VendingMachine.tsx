@@ -16,16 +16,14 @@ const VendingMachine: React.FC = () => {
     showAdminDisplay,
     machineState,
     message,
-    balance,
-    remainingBalance,
-    currency,
-    selectedProduct,
     handleDeposit,
     handleSelectProduct,
     handlePurchase,
     handleCancel,
     droppedProduct,
   } = useVendingMachine();
+
+  const { currency, products } = machineState;
 
   return (
     <div>
@@ -41,9 +39,6 @@ const VendingMachine: React.FC = () => {
 
           <DisplayScreen
             message={message}
-            balance={balance}
-            remainingBalance={remainingBalance}
-            selectedProduct={selectedProduct}
             machineState={machineState}
             showAdminDisplay={showAdminDisplay}
           />
@@ -51,7 +46,7 @@ const VendingMachine: React.FC = () => {
           <h3>Insert Coins</h3>
           <div className="coinContainer">
             {COINS.map(coin => (
-              <div className="coinItem">
+              <div className="coinItem" key={coin}>
                 <CoinButton
                   key={coin}
                   type={coin}
@@ -61,7 +56,7 @@ const VendingMachine: React.FC = () => {
               </div>
             ))}
           </div>
-          {machineState.products.map(p => (
+          {products.map(p => (
             <ProductSlot
               key={p.name}
               product={p}
@@ -80,7 +75,7 @@ const VendingMachine: React.FC = () => {
             className="banner banner-desktop"
           />
           <div className="productGrid">
-            {machineState.products.map(p => (
+            {products.map(p => (
               <div key={p.name} className="productItem">
                 <div
                   className={`productImageWrapper ${p.stock === 0 ? 'soldOut' : ''}`}

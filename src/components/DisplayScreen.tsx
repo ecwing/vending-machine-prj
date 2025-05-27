@@ -1,24 +1,20 @@
 import React from 'react';
 import { formatAmount } from '../utils/convertToDollarValue';
-import type { MachineState, Product } from '../types/index';
+import type { MachineState } from '../types/index';
 interface DisplayScreenProps {
   machineState: MachineState;
   message: string;
-  balance: number;
-  remainingBalance: number;
-  selectedProduct: Product | null;
   showAdminDisplay: boolean;
 }
 
 const DisplayScreen: React.FC<DisplayScreenProps> = ({
   machineState,
   message,
-  balance,
-  remainingBalance,
-  selectedProduct,
   showAdminDisplay,
 }) => {
   const isLongMessage = message.length > 26;
+
+  const { selectedProduct, remainingBalance, balance } = machineState;
 
   return (
     <div className="displayWrapper">
